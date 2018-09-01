@@ -1,9 +1,8 @@
 language: erlang
-addons:
-  apt:
-    packages:
-      - libprotobuf-dev
-      - protobuf-compiler
+
+before_install:
+  - .travis/install-protobuf.sh 3.6.1 $HOME/protobuf
+
 otp_release:
   - 21.0
   - 20.3
@@ -12,8 +11,16 @@ otp_release:
   - 17.5
   - R16B03
   - R15B03
+
 env:
   - VERBOSE=1
+
 script:
   - make
-  - make test
+  - |
+    export PATH=$HOME/protobuf/bin:$PATH
+    export CFLAGS="-I$HOME/protobuf/include -std=c++11"
+    export LDFLAGS=-L$HOME/protobuf/lib
+    export LD_LIBRARY_PATH=$HOME/protobuf/lib:$LD_LIBRARY_PATH
+    protoc --version
+    make test
